@@ -1,4 +1,7 @@
-package com.tribitgroup.host;
+package com.tribitgroup.http;
+
+import com.tribitgroup.http.handler.HomeRequestHandler;
+import com.tribitgroup.http.handler.NullRequestHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,10 +9,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+
 public class HttpServerThread extends Thread {
     static final int HttpServerPORT = 8888;
     ServerSocket httpServerSocket;
     HttpRequest httpRequest;
+    Map<String, String> requestHandlers = new HashMap<>();
+
+    public HttpServerThread(){
+        requestHandlers.put("/", HomeRequestHandler.class.toString().split(" ")[1]);
+    }
+
     @Override
     public void run() {
         Socket socket = null;
@@ -45,7 +57,7 @@ public class HttpServerThread extends Thread {
             httpRequest.setRawRequest(requestAsString);
             httpRequest.setOutputStream(socket.getOutputStream());
 
-            HttpResponseThread httpResponseThread = new HttpResponseThread(httpRequest, socket);
+            RequestHandler httpResponseThread = getHandler(socket);
             httpResponseThread.start();
         } catch (IOException e) {
             if(socket != null)
@@ -54,6 +66,24 @@ public class HttpServerThread extends Thread {
         } finally {
             handleHttpRequest();
         }
+    }
+
+    private RequestHandler getHandler(Socket socket) {
+        String url = httpRequest.getUrlWithoutParams();
+        RequestHandler requestHandler = new NullRequestHandler();
+        if(requestHandlers.containsKey(url.toLowerCase().trim())){
+            try {
+                String className = requestHandlers.get(url.toLowerCase().trim());
+                requestHandler = (RequestHandler) Class.forName(className).newInstance();
+            } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+                //throw new RuntimeException(e);
+            }
+        }else{
+
+        }
+        requestHandler.setSocket(socket);
+        requestHandler.setRequest(httpRequest);
+        return requestHandler;
     }
 
     private String getRequestAsString(Socket socket) throws IOException {

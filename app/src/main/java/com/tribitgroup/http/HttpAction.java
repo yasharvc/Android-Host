@@ -1,4 +1,4 @@
-package com.tribitgroup.host;
+package com.tribitgroup.http;
 
 public enum HttpAction {
     GET,

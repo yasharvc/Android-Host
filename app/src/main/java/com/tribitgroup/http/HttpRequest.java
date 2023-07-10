@@ -1,4 +1,6 @@
-package com.tribitgroup.host;
+package com.tribitgroup.http;
+
+import com.tribitgroup.http.HttpAction;
 
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;

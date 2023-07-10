@@ -1,29 +1,19 @@
-package com.tribitgroup.host;
+package com.tribitgroup.http.handler;
 
-import android.util.Log;
+import com.tribitgroup.http.RequestHandler;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket;
-import java.nio.CharBuffer;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
-public class HttpResponseThread extends Thread {
-    HttpRequest request;
-    String h1;
-    Socket socket;
+public class HomeRequestHandler extends RequestHandler {
 
-    HttpResponseThread(HttpRequest request, Socket socket){
-        this.socket = socket;
+    String h1;
+
+    public HomeRequestHandler(){
         Date currentTime = Calendar.getInstance().getTime();
-        this.request = request;
         h1 = "Test" + currentTime;
     }
 
@@ -70,4 +60,8 @@ public class HttpResponseThread extends Thread {
         return;
     }
 
+    @Override
+    public boolean isMatch() {
+        return request.getUrlWithoutParams().trim().equals("/");
+    }
 }
